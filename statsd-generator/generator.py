@@ -56,15 +56,19 @@ class MonascaStatsdGenerator(object):
                 mstatsd.histogram('file.upload.size',
                                   random.randrange(1, 100),
                                   dimensions={'Version': '1.0'})
+
+                @mstatsd.timed('config_db_time',
+                               dimensions={'db_name': 'mydb'})
+                def time_db():
+                    time.sleep(0.5)
+                time_db()
+
                 # Send some regular statsd messages
-                connection = statsd.Connection()
                 counter = statsd.Counter('statsd_generator')
                 counter += 1
                 gauge = statsd.Gauge('statsd_generator')
                 gauge.send('cpu_percent',
                            random.uniform(1.0, 100.0))
-                average = statsd.Average('statsd_generator', connection)
-                average.send('cpu_avg', random.randrange(1, 100))
                 print("Completed iteration " + str(index) +
                       ".  Sleeping for " + str(self.delay) + " seconds...")
                 time.sleep(self.delay)

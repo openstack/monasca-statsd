@@ -1,4 +1,4 @@
-monasca-statsd
+import monascastatsd.monasca_statsdmonasca-statsd
 ================
 
 A Monasca-Statsd Python client.
@@ -16,30 +16,32 @@ First install the library with `pip` or `easy_install`
 
 Then start instrumenting your code:
 
-``` python
+```
 # Import the module.
-from monascastatsd import monascastatsd
+import monascastatsd.monasca_statsd
+
+mstatsd = monascastatsd.monasca_statsd.MonascaStatsd()
 
 # Optionally, configure the host and port if you're running Statsd on a
 # non-standard port.
-monascastatsd.connect('localhost', 8125)
+mstatsd.connect('localhost', 8125)
 
 # Increment a counter.
-monascastatsd.increment('page.views')
+mstatsd.increment('page.views')
 
 # Record a gauge 50% of the time.
-monascastatsd.gauge('users.online', 123, sample_rate=0.5)
+mstatsd.gauge('users.online', 123, sample_rate=0.5)
 
 # Sample a histogram.
-monascastatsd.histogram('file.upload.size', 1234)
+mstatsd.histogram('file.upload.size', 1234)
 
 # Time a function call.
-@monascastatsd.timed('page.render')
+@mstatsd.timed('page.render')
 def render_page():
     # Render things ...
 
-# Tag a metric.
-monascastatsd.histogram('query.time', 10, dimensions = {"version": "1.0", "environment": "dev"})
+# Add a dimension to a metric.
+mstatsd.histogram('query.time', 10, dimensions = {'version': '1.0', 'environment': 'dev'})
 ```
 Documentation
 -------------

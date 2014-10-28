@@ -86,25 +86,25 @@ class TestMonStatsd(unittest.TestCase):
 
     def test_gauge_with_dimensions(self):
         self.monascastatsd.gauge('gt', 123.4,
-                                 dimensions=['country:china',
-                                             'age:45',
-                                             'color:blue'])
-        self.assertEqual("gt:123.4|g|#[" +
-                         "'country:china', " +
-                         "'age:45', " +
-                         "'color:blue']",
+                                 dimensions={'country': 'china',
+                                             'age': 45,
+                                             'color': 'blue'})
+        self.assertEqual("gt:123.4|g|#{" +
+                         "'color': 'blue', " +
+                         "'country': 'china', " +
+                         "'age': 45}",
                          self.recv())
 
     def test_counter_with_dimensions(self):
         self.monascastatsd.increment('ct',
-                                     dimensions=['country:canada',
-                                                 'color:red'])
-        self.assertEqual("ct:1|c|#['country:canada', 'color:red']",
+                                     dimensions={'country': 'canada',
+                                                 'color': 'red'})
+        self.assertEqual("ct:1|c|#{'color': 'red', 'country': 'canada'}",
                          self.recv())
 
     def test_histogram_with_dimensions(self):
-        self.monascastatsd.histogram('h', 1, dimensions=['color:red'])
-        self.assertEqual("h:1|h|#['color:red']", self.recv())
+        self.monascastatsd.histogram('h', 1, dimensions={'color': 'red'})
+        self.assertEqual("h:1|h|#{'color': 'red'}", self.recv())
 
     def test_sample_rate(self):
         self.monascastatsd.increment('c', sample_rate=0)
@@ -120,14 +120,14 @@ class TestMonStatsd(unittest.TestCase):
         for _ in range(100):
             self.monascastatsd.gauge('gst',
                                      23,
-                                     dimensions=['status:sampled'],
+                                     dimensions={'status': 'sampled'},
                                      sample_rate=0.9)
 
         def test_samples_with_dimensions(self):
             for _ in range(100):
                 self.monascastatsd.gauge('gst',
                                          23,
-                                         dimensions=['status:sampled'],
+                                         dimensions={'status': 'sampled'},
                                          sample_rate=0.9)
             self.assertEqual('gst:23|g|@0.9|#status:sampled')
 
