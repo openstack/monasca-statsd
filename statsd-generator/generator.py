@@ -18,7 +18,7 @@ import ConfigParser
 import random
 import time
 
-import monascastatsd.monasca_statsd
+import monascastatsd as mstatsd
 
 import statsd
 
@@ -43,30 +43,42 @@ class MonascaStatsdGenerator(object):
     def send_messages(self):
         '''Main processing for sending messages.'''
         try:
-            mstatsd = monascastatsd.monasca_statsd.MonascaStatsd()
-            mstatsd.connect(self.host, self.port)
+            conn = mstatsd.Connection(host=self.host, port=self.port)
+            self.client = mstatsd.Client(name='statsd-generator', connection=conn)
             for index in range(1, self.num_of_iterations + 1):
                 print("Starting iteration " + str(index) +
                       " of " + str(self.num_of_iterations))
-                mstatsd.increment('Teraflops', 5)
-                mstatsd.gauge('NumOfTeraflops',
-                              random.uniform(1.0, 10.0),
-                              dimensions={'Origin': 'Dev',
-                                          'Environment': 'Test'})
-                mstatsd.histogram('file.upload.size',
-                                  random.randrange(1, 100),
-                                  dimensions={'Version': '1.0'})
+                counter = self.client.get_counter('teraflops')
+                counter.increment(5)
+                gauge = self.client.get_gauge()
+                gauge.send('num_of_teraflops',
+                           random.uniform(1.0, 10.0),
+                           dimensions={'origin': 'dev',
+                                       'environment': 'test'})
+                histogram = self.client.get_histogram('hist')
+                histogram.send('file.upload.size',
+                               random.randrange(1, 100),
+                               dimensions={'version': '1.0'})
+                set = self.client.get_set('hist')
+                set.send('load_time',
+                         random.randrange(1, 100),
+                         dimensions={'page_name': 'mypage.html'})
 
-                @mstatsd.timed('config_db_time',
-                               dimensions={'db_name': 'mydb'})
+                timer = self.client.get_timer('timer')
+
+                @timer.timed('config_db_time',
+                             dimensions={'db_name': 'mydb'})
                 def time_db():
-                    time.sleep(0.5)
+                    time.sleep(0.2)
                 time_db()
 
+                with timer.time('time_block'):
+                    time.sleep(0.3)
+
                 # Send some regular statsd messages
-                counter = statsd.Counter('statsd_generator')
+                counter = statsd.Counter('statsd_counter')
                 counter += 1
-                gauge = statsd.Gauge('statsd_generator')
+                gauge = statsd.Gauge('statsd_gauge')
                 gauge.send('cpu_percent',
                            random.uniform(1.0, 100.0))
                 print("Completed iteration " + str(index) +

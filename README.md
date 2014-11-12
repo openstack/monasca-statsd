@@ -1,7 +1,5 @@
-import monascastatsd.monasca_statsdmonasca-statsd
-================
-
 A Monasca-Statsd Python client.
+================
 
 Quick Start Guide
 -----------------
@@ -18,35 +16,60 @@ Then start instrumenting your code:
 
 ```
 # Import the module.
-import monascastatsd.monasca_statsd
+import monascastatsd as mstatsd
 
-mstatsd = monascastatsd.monasca_statsd.MonascaStatsd()
+# Create the connection
+conn = mstatsd.Connection(host='localhost', port=8125)
 
-# Optionally, configure the host and port if you're running Statsd on a
-# non-standard port.
-mstatsd.connect('localhost', 8125)
+# Create the client with optional dimensions
+client = mstatsd.Client(connection=conn, dimensions={'env': 'test'})
 
-# Increment a counter.
-mstatsd.increment('page.views')
+NOTE: You can also create a client without specifying the connection and it will create the client with the default connection information for the monasca-agent statsd processor daemon which uses host='localhost' and port=8125.
+
+client = mstatsd.Client(dimensions={'env': 'test'})
+
+# Increment and decrement a counter.
+counter = client.get_counter(name='page.views')
+
+counter.increment()
+counter += 3
+
+counter.decrement()
+counter -= 3
 
 # Record a gauge 50% of the time.
-mstatsd.gauge('users.online', 123, sample_rate=0.5)
+gauge = client.get_gauge('gauge', dimensions={'env': 'test'})
+
+gauge.send('metric', 123.4, sample_rate=0.5)
 
 # Sample a histogram.
-mstatsd.histogram('file.upload.size', 1234)
+histogram = client.get_histogram('histogram', dimensions={'test': 'True'})
+
+histogram.send('metric', 123.4, dimensions={'color': 'red'})
 
 # Time a function call.
-@mstatsd.timed('page.render')
+timer = client.get_timer()
+
+@timer.timed('page.render')
 def render_page():
     # Render things ...
+    pass
 
-# Add a dimension to a metric.
-mstatsd.histogram('query.time', 10, dimensions = {'version': '1.0', 'environment': 'dev'})
+# Time a block of code.
+timer = client.get_timer()
+
+with timer.time('t'):
+    # Do stuff
+    time.sleep(2)
+
+# Add dimensions to any metric.
+histogram = client.get_histogram('my_hist')
+histogram.send('query.time', 10, dimensions = {'version': '1.0', 'environment': 'dev'})
 ```
-Documentation
+Repository
 -------------
 
-Read the full API docs
+The monasca-statsd code is located here:
 [here](https://github.com/stackforge/monasca-statsd).
 
 Feedback
@@ -54,11 +77,6 @@ Feedback
 
 To suggest a feature, report a bug, or general discussion, head over
 [here](https://bugs.launchpad.net/monasca).
-
-Change Log
-----------
-- 1.0.0
-    - Initial version of the code
 
 
 License
