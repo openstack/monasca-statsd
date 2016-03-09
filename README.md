@@ -24,7 +24,9 @@ conn = mstatsd.Connection(host='localhost', port=8125)
 # Create the client with optional dimensions
 client = mstatsd.Client(connection=conn, dimensions={'env': 'test'})
 
-NOTE: You can also create a client without specifying the connection and it will create the client with the default connection information for the monasca-agent statsd processor daemon which uses host='localhost' and port=8125.
+NOTE: You can also create a client without specifying the connection and it will create the client 
+with the default connection information for the monasca-agent statsd processor daemon 
+which uses host='localhost' and port=8125.
 
 client = mstatsd.Client(dimensions={'env': 'test'})
 
