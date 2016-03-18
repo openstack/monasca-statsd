@@ -161,14 +161,6 @@ class TestMonascaStatsd(unittest.TestCase):
                        dimensions={'status': 'sampled'},
                        sample_rate=0.9)
 
-        def test_samples_with_dimensions(self):
-            for _ in range(100):
-                gauge.send('gst',
-                           23,
-                           dimensions={'status': 'sampled'},
-                           sample_rate=0.9)
-            self.assertEqual('gst:23|g|@0.9|#status:sampled')
-
     def test_timing(self):
         timer = self.client.get_timer()
         timer.timing('t', 123)
