@@ -17,7 +17,7 @@ import contextlib
 import functools
 import time
 
-from metricbase import MetricBase
+from monascastatsd.metricbase import MetricBase
 
 
 class Timer(MetricBase):
