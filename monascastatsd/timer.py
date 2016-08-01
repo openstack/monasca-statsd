@@ -1,4 +1,4 @@
-# (C) Copyright 2014 Hewlett Packard Enterprise Development Company LP
+# (C) Copyright 2014,2016 Hewlett Packard Enterprise Development LP
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ class Timer(MetricBase):
         >>> monascastatsd.timing("query.response.time", 1234)
         """
         self._connection.report(metric=self.update_name(name),
-                                metric_type='ms',
+                                metric_type='g',
                                 value=value,
                                 dimensions=self.update_dimensions(dimensions),
                                 sample_rate=sample_rate)

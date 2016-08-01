@@ -100,29 +100,27 @@ class TestMonascaStatsd(unittest.TestCase):
                                           dimensions={'date': '10/24', 'time': '23:00'})
 
         counter.increment(dimensions={'country': 'canada', 'color': 'red'})
-        self.assertEqual("counter_with_dims:1|c|#{'date': '10/24', 'color': 'red', " +
-                         "'country': 'canada', 'env': 'test', 'time': '23:00'}",
-                         self.recv(counter))
+
+        result = self.recv(counter)
+        self.assertRegexpMatches(result, "counter_with_dims:1|c|#{")
+        self.assertRegexpMatches(result, "'country': 'canada'")
+        self.assertRegexpMatches(result, "'date': '10/24'")
+        self.assertRegexpMatches(result, "'color': 'red'")
+        self.assertRegexpMatches(result, "'env': 'test'")
+        self.assertRegexpMatches(result, "'time': '23:00'")
 
         counter += 1
-        self.assertEqual("counter_with_dims:1|c|#{'date': '10/24', 'env': 'test', 'time': '23:00'}",
-                         self.recv(counter))
 
-    def test_set(self):
-        set = self.client.get_set('set')
-        set.send('metric', 123)
-        assert self.recv(set) == "set.metric:123|s|#{'env': 'test'}"
+        result = self.recv(counter)
+        self.assertRegexpMatches(result, "counter_with_dims:1|c|#{")
+        self.assertRegexpMatches(result, "'date': '10/24'")
+        self.assertRegexpMatches(result, "'env': 'test'")
+        self.assertRegexpMatches(result, "'time': '23:00'")
 
     def test_gauge(self):
         gauge = self.client.get_gauge('gauge')
         gauge.send('metric', 123.4)
         assert self.recv(gauge) == "gauge.metric:123.4|g|#{'env': 'test'}"
-
-    def test_histogram(self):
-        histogram = self.client.get_histogram('histogram')
-
-        histogram.send('metric', 123.4)
-        self.assertEqual("histogram.metric:123.4|h|#{'env': 'test'}", self.recv(histogram))
 
     def test_gauge_with_dimensions(self):
         gauge = self.client.get_gauge('gauge')
@@ -130,17 +128,13 @@ class TestMonascaStatsd(unittest.TestCase):
                    dimensions={'country': 'china',
                                'age': 45,
                                'color': 'blue'})
-        self.assertEqual("gauge.gt:123.4|g|#{" +
-                         "'color': 'blue', " +
-                         "'country': 'china', " +
-                         "'age': 45, " +
-                         "'env': 'test'}",
-                         self.recv(gauge))
 
-    def test_histogram_with_dimensions(self):
-        histogram = self.client.get_histogram('my_hist')
-        histogram.send('h', 1, dimensions={'color': 'red'})
-        self.assertEqual("my_hist.h:1|h|#{'color': 'red', 'env': 'test'}", self.recv(histogram))
+        result = self.recv(gauge)
+        self.assertRegexpMatches(result, "gauge.gt:123.4|g|#{")
+        self.assertRegexpMatches(result, "'country': 'china'")
+        self.assertRegexpMatches(result, "'age': 45")
+        self.assertRegexpMatches(result, "'color': 'blue'")
+        self.assertRegexpMatches(result, "'env': 'test'")
 
     def test_sample_rate(self):
         counter = self.client.get_counter('sampled_counter')
@@ -164,7 +158,7 @@ class TestMonascaStatsd(unittest.TestCase):
     def test_timing(self):
         timer = self.client.get_timer()
         timer.timing('t', 123)
-        self.assertEqual("t:123|ms|#{'env': 'test'}", self.recv(timer))
+        self.assertEqual("t:123|g|#{'env': 'test'}", self.recv(timer))
 
     def test_time(self):
         timer = self.client.get_timer()
@@ -174,7 +168,7 @@ class TestMonascaStatsd(unittest.TestCase):
         name_value, type_, dimensions = packet.split('|')
         name, value = name_value.split(':')
 
-        self.assertEqual('ms', type_)
+        self.assertEqual('g', type_)
         self.assertEqual('t', name)
         self.assert_almost_equal(2.0, float(value), 0.1)
         self.assertEqual("{'env': 'test'}", dimensions.lstrip('#'))
@@ -199,7 +193,7 @@ class TestMonascaStatsd(unittest.TestCase):
         name_value, type_, dimensions = packet.split('|')
         name, value = name_value.split(':')
 
-        self.assertEqual('ms', type_)
+        self.assertEqual('g', type_)
         self.assertEqual('timed.test', name)
         self.assert_almost_equal(0.5, float(value), 0.1)
         self.assertEqual("{'env': 'test'}", dimensions.lstrip('#'))
@@ -218,7 +212,7 @@ class TestMonascaStatsd(unittest.TestCase):
         timer.timing('timer', 123)
         self.client.connection.close_buffer()
 
-        self.assertEqual("site.views:123|g|#{'env': 'test'}\nsite.timer:123|ms|#{'env': 'test'}",
+        self.assertEqual("site.views:123|g|#{'env': 'test'}\nsite.timer:123|g|#{'env': 'test'}",
                          self.recv(gauge))
 
     def test_context_manager(self):
@@ -229,7 +223,7 @@ class TestMonascaStatsd(unittest.TestCase):
             client.get_gauge('page').send('views', 123)
             client.get_timer('page').timing('timer', 12)
 
-        self.assertEqual('ContextTester.page.views:123|g\nContextTester.page.timer:12|ms',
+        self.assertEqual('ContextTester.page.views:123|g\nContextTester.page.timer:12|g',
                          fake_socket.recv())
 
     def test_batched_buffer_autoflush(self):
