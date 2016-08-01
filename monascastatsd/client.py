@@ -1,4 +1,4 @@
-# (C) Copyright 2014 Hewlett Packard Enterprise Development Company LP
+# (C) Copyright 2014,2016 Hewlett Packard Enterprise Development LP
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@
 from monascastatsd.connection import Connection
 from monascastatsd.counter import Counter
 from monascastatsd.gauge import Gauge
-from monascastatsd.histogram import Histogram
-from monascastatsd.set import Set
 from monascastatsd.timer import Timer
 
 
@@ -65,26 +63,6 @@ class Client(object):
         return Gauge(name=self._update_name(name),
                      connection=connection,
                      dimensions=self._update_dimensions(dimensions))
-
-    def get_histogram(self, name=None, connection=None, dimensions=None):
-        """Gets a Histogram object.
-
-        """
-        if connection is None:
-            connection = self.connection
-        return Histogram(name=self._update_name(name),
-                         connection=connection,
-                         dimensions=self._update_dimensions(dimensions))
-
-    def get_set(self, name=None, connection=None, dimensions=None):
-        """Gets a Set object.
-
-        """
-        if connection is None:
-            connection = self.connection
-        return Set(name=self._update_name(name),
-                   connection=connection,
-                   dimensions=self._update_dimensions(dimensions))
 
     def get_timer(self, name=None, connection=None, dimensions=None):
         """Gets a Timer object.
