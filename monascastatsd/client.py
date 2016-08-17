@@ -62,52 +62,52 @@ class Client(object):
         :param max_buffer_size: Maximum number of metric to buffer before
          sending to the server if sending metrics in batch
         """
+        self._max_buffer_size = max_buffer_size
+        self._set_connection(connection, host, port)
+        self._dimensions = dimensions
+        self._client_name = name
 
+    def _set_connection(self, connection, host, port):
         if connection is None:
             self.connection = Connection(host=host,
                                          port=port,
-                                         max_buffer_size=max_buffer_size)
+                                         max_buffer_size=self._max_buffer_size)
         else:
             self.connection = connection
-        self._dimensions = dimensions
-        self._name = name
 
     def get_counter(self, name, connection=None, dimensions=None):
         """Gets a Counter object.
 
         """
-        if connection is None:
-            connection = self.connection
-        return Counter(name=self._update_name(name),
-                       connection=connection,
-                       dimensions=self._update_dimensions(dimensions))
+        return self._get_statsd_object_by_type(Counter, name, connection,
+                                               dimensions)
 
     def get_gauge(self, name=None, connection=None, dimensions=None):
         """Gets a Gauge object.
 
         """
-        if connection is None:
-            connection = self.connection
-        return Gauge(name=self._update_name(name),
-                     connection=connection,
-                     dimensions=self._update_dimensions(dimensions))
+        return self._get_statsd_object_by_type(Gauge, name, connection,
+                                               dimensions)
 
     def get_timer(self, name=None, connection=None, dimensions=None):
         """Gets a Timer object.
 
         """
-        if connection is None:
-            connection = self.connection
-        return Timer(name=self._update_name(name),
-                     connection=connection,
-                     dimensions=self._update_dimensions(dimensions))
+        return self._get_statsd_object_by_type(Timer, name, connection,
+                                               dimensions)
 
-    def _update_name(self, name):
+    def _get_statsd_object_by_type(self, object_type, name, connection,
+                                   dimensions):
+        return object_type(name=self._update_metric_name(name),
+                           connection=connection or self.connection,
+                           dimensions=self._update_dimensions(dimensions))
+
+    def _update_metric_name(self, metric_name):
         """Update the metric name with the client
 
         name that was passed in on instantiation.
         """
-        return common.update_name(self._name, name)
+        return common.update_name(self._client_name, metric_name)
 
     def _update_dimensions(self, dimensions):
         """Update the dimensions list with the default
