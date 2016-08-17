@@ -56,11 +56,7 @@ class Counter(metricbase.MetricBase):
         >>> monascastatsd.increment()
         >>> monascastatsd.increment(12)
         """
-        self._connection.report(metric=self._name,
-                                metric_type='c',
-                                value=value,
-                                dimensions=self.update_dimensions(dimensions),
-                                sample_rate=sample_rate)
+        self._report_change(dimensions, sample_rate, value)
 
     def decrement(self, value=1, dimensions=None, sample_rate=1):
         """Decrement a counter, optionally setting a value, dimensions and a
@@ -70,9 +66,12 @@ class Counter(metricbase.MetricBase):
         >>> monascastatsd.decrement()
         >>> monascastatsd.decrement(2)
         """
+        self._report_change(dimensions, sample_rate, -value)
+
+    def _report_change(self, dimensions, sample_rate, value):
         self._connection.report(metric=self._name,
                                 metric_type='c',
-                                value=-value,
+                                value=value,
                                 dimensions=self.update_dimensions(dimensions),
                                 sample_rate=sample_rate)
 
