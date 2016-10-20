@@ -23,7 +23,8 @@ from monascastatsd.timer import Timer
 
 class Client(object):
 
-    def __init__(self, name=None, connection=None, max_buffer_size=50, dimensions=None):
+    def __init__(self, name=None, host='localhost', port=8125,
+                 connection=None, max_buffer_size=50, dimensions=None):
         """Initialize a Client object.
 
         >>> monascastatsd = MonascaStatsd()
@@ -35,10 +36,11 @@ class Client(object):
         :param max_buffer_size: Maximum number of metric to buffer before
          sending to the server if sending metrics in batch
         """
+
         if connection is None:
-            self.connection = Connection(host='localhost',
-                                         port=8125,
-                                         max_buffer_size=50)
+            self.connection = Connection(host=host,
+                                         port=port,
+                                         max_buffer_size=max_buffer_size)
         else:
             self.connection = connection
         self._dimensions = dimensions

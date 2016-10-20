@@ -23,6 +23,8 @@ import unittest
 
 import monascastatsd as mstatsd
 
+import mock
+
 
 class FakeSocket(object):
 
@@ -59,6 +61,20 @@ class TestMonascaStatsd(unittest.TestCase):
 
     def recv(self, metric_obj):
         return metric_obj._connection.socket.recv()
+
+    @mock.patch('monascastatsd.client.Connection')
+    def test_client_set_host_port(self, connection_mock):
+        mstatsd.Client(host='foo.bar', port=5213)
+        connection_mock.assert_called_once_with(host='foo.bar',
+                                                port=5213,
+                                                max_buffer_size=50)
+
+    @mock.patch('monascastatsd.client.Connection')
+    def test_client_default_host_port(self, connection_mock):
+        mstatsd.Client()
+        connection_mock.assert_called_once_with(host='localhost',
+                                                port=8125,
+                                                max_buffer_size=50)
 
     def test_counter(self):
         counter = self.client.get_counter(name='page.views')
