@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from monascastatsd.metricbase import MetricBase
+from monascastatsd import metricbase
 
 
-class Gauge(MetricBase):
+class Gauge(metricbase.MetricBase):
 
     def __init__(self, connection, name=None, dimensions=None):
         super(self.__class__, self).__init__(name=name,

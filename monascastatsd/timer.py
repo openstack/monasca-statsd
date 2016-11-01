@@ -17,10 +17,10 @@ import contextlib
 import functools
 import time
 
-from monascastatsd.metricbase import MetricBase
+from monascastatsd import metricbase
 
 
-class Timer(MetricBase):
+class Timer(metricbase.MetricBase):
 
     def __init__(self, connection, name=None, dimensions=None):
         super(self.__class__, self).__init__(name=name,
