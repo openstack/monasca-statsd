@@ -42,10 +42,7 @@ import logging
 import random
 import socket
 
-try:
-    import itertools
-except ImportError:
-    imap = map
+from six.moves import map
 
 logging.basicConfig()
 log = logging.getLogger(__name__)
@@ -118,7 +115,7 @@ class Connection(object):
             payload.extend(["|#"])
             payload.append(dimensions)
 
-        encoded = "".join(itertools.imap(str, payload))
+        encoded = "".join(map(str, payload))
         self._send(encoded)
 
     def _send_to_server(self, packet):

@@ -49,6 +49,8 @@ import unittest
 import monascastatsd as mstatsd
 
 import mock
+import six
+from six.moves import range
 
 
 class FakeSocket(object):
@@ -105,35 +107,35 @@ class TestMonascaStatsd(unittest.TestCase):
         counter = self.client.get_counter(name='page.views')
 
         counter.increment()
-        self.assertEqual("page.views:1|c|#{'env': 'test'}",
+        self.assertEqual(six.b("page.views:1|c|#{'env': 'test'}"),
                          self.recv(counter))
 
         counter += 1
-        self.assertEqual("page.views:1|c|#{'env': 'test'}",
+        self.assertEqual(six.b("page.views:1|c|#{'env': 'test'}"),
                          self.recv(counter))
 
         counter.increment(11)
-        self.assertEqual("page.views:11|c|#{'env': 'test'}",
+        self.assertEqual(six.b("page.views:11|c|#{'env': 'test'}"),
                          self.recv(counter))
 
         counter += 11
-        self.assertEqual("page.views:11|c|#{'env': 'test'}",
+        self.assertEqual(six.b("page.views:11|c|#{'env': 'test'}"),
                          self.recv(counter))
 
         counter.decrement()
-        self.assertEqual("page.views:-1|c|#{'env': 'test'}",
+        self.assertEqual(six.b("page.views:-1|c|#{'env': 'test'}"),
                          self.recv(counter))
 
         counter -= 1
-        self.assertEqual("page.views:-1|c|#{'env': 'test'}",
+        self.assertEqual(six.b("page.views:-1|c|#{'env': 'test'}"),
                          self.recv(counter))
 
         counter.decrement(12)
-        self.assertEqual("page.views:-12|c|#{'env': 'test'}",
+        self.assertEqual(six.b("page.views:-12|c|#{'env': 'test'}"),
                          self.recv(counter))
 
         counter -= 12
-        self.assertEqual("page.views:-12|c|#{'env': 'test'}",
+        self.assertEqual(six.b("page.views:-12|c|#{'env': 'test'}"),
                          self.recv(counter))
 
     def test_counter_with_dimensions(self):
@@ -143,6 +145,9 @@ class TestMonascaStatsd(unittest.TestCase):
         counter.increment(dimensions={'country': 'canada', 'color': 'red'})
 
         result = self.recv(counter)
+        if isinstance(result, bytes):
+            result = result.decode('utf-8')
+
         self.assertRegexpMatches(result, "counter_with_dims:1|c|#{")
         self.assertRegexpMatches(result, "'country': 'canada'")
         self.assertRegexpMatches(result, "'date': '10/24'")
@@ -153,6 +158,9 @@ class TestMonascaStatsd(unittest.TestCase):
         counter += 1
 
         result = self.recv(counter)
+        if isinstance(result, bytes):
+            result = result.decode('utf-8')
+
         self.assertRegexpMatches(result, "counter_with_dims:1|c|#{")
         self.assertRegexpMatches(result, "'date': '10/24'")
         self.assertRegexpMatches(result, "'env': 'test'")
@@ -161,7 +169,11 @@ class TestMonascaStatsd(unittest.TestCase):
     def test_gauge(self):
         gauge = self.client.get_gauge('gauge')
         gauge.send('metric', 123.4)
-        assert self.recv(gauge) == "gauge.metric:123.4|g|#{'env': 'test'}"
+        result = self.recv(gauge)
+        if isinstance(result, bytes):
+            result = result.decode('utf-8')
+
+        assert result == "gauge.metric:123.4|g|#{'env': 'test'}"
 
     def test_gauge_with_dimensions(self):
         gauge = self.client.get_gauge('gauge')
@@ -171,6 +183,9 @@ class TestMonascaStatsd(unittest.TestCase):
                                'color': 'blue'})
 
         result = self.recv(gauge)
+        if isinstance(result, bytes):
+            result = result.decode('utf-8')
+
         self.assertRegexpMatches(result, "gauge.gt:123.4|g|#{")
         self.assertRegexpMatches(result, "'country': 'china'")
         self.assertRegexpMatches(result, "'age': 45")
@@ -186,7 +201,7 @@ class TestMonascaStatsd(unittest.TestCase):
         self.assert_almost_equal(3000,
                                  len(self.client.connection.socket.payloads),
                                  150)
-        self.assertEqual("sampled_counter:1|c|@0.3|#{'env': 'test'}", self.recv(counter))
+        self.assertEqual(six.b("sampled_counter:1|c|@0.3|#{'env': 'test'}"), self.recv(counter))
 
     def test_samples_with_dimensions(self):
         gauge = self.client.get_gauge()
@@ -199,13 +214,16 @@ class TestMonascaStatsd(unittest.TestCase):
     def test_timing(self):
         timer = self.client.get_timer()
         timer.timing('t', 123)
-        self.assertEqual("t:123|g|#{'env': 'test'}", self.recv(timer))
+        self.assertEqual(six.b("t:123|g|#{'env': 'test'}"), self.recv(timer))
 
     def test_time(self):
         timer = self.client.get_timer()
         with timer.time('t'):
             time.sleep(2)
         packet = self.recv(timer)
+        if isinstance(packet, bytes):
+            packet = packet.decode("utf-8")
+
         name_value, type_, dimensions = packet.split('|')
         name, value = name_value.split(':')
 
@@ -231,6 +249,9 @@ class TestMonascaStatsd(unittest.TestCase):
         self.assertEqual(result, (1, 2, 1, 3))
 
         packet = self.recv(timer)
+        if isinstance(packet, bytes):
+            packet = packet.decode("utf-8")
+
         name_value, type_, dimensions = packet.split('|')
         name, value = name_value.split(':')
 
@@ -253,7 +274,7 @@ class TestMonascaStatsd(unittest.TestCase):
         timer.timing('timer', 123)
         self.client.connection.close_buffer()
 
-        self.assertEqual("site.views:123|g|#{'env': 'test'}\nsite.timer:123|g|#{'env': 'test'}",
+        self.assertEqual(six.b("site.views:123|g|#{'env': 'test'}\nsite.timer:123|g|#{'env': 'test'}"),
                          self.recv(gauge))
 
     def test_context_manager(self):
@@ -264,7 +285,7 @@ class TestMonascaStatsd(unittest.TestCase):
             client.get_gauge('page').send('views', 123)
             client.get_timer('page').timing('timer', 12)
 
-        self.assertEqual('ContextTester.page.views:123|g\nContextTester.page.timer:12|g',
+        self.assertEqual(six.b('ContextTester.page.views:123|g\nContextTester.page.timer:12|g'),
                          fake_socket.recv())
 
     def test_batched_buffer_autoflush(self):
@@ -275,10 +296,10 @@ class TestMonascaStatsd(unittest.TestCase):
             counter = client.get_counter('mycounter')
             for _ in range(51):
                 counter.increment()
-            self.assertEqual('\n'.join(['BufferedTester.mycounter:1|c' for _ in range(50)]),
+            self.assertEqual(six.b('\n'.join(['BufferedTester.mycounter:1|c' for _ in range(50)])),
                              fake_socket.recv())
 
-        self.assertEqual('BufferedTester.mycounter:1|c', fake_socket.recv())
+        self.assertEqual(six.b('BufferedTester.mycounter:1|c'), fake_socket.recv())
 
     @staticmethod
     def assert_almost_equal(a, b, delta):
