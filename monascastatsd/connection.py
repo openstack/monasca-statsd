@@ -1,4 +1,5 @@
 # (C) Copyright 2014-2016 Hewlett Packard Enterprise Development LP
+# Copyright 2016 FUJITSU LIMITED
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,11 +39,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import six
+
 import logging
 import random
 import socket
-
-from six.moves import map
 
 logging.basicConfig()
 log = logging.getLogger(__name__)
@@ -115,7 +116,7 @@ class Connection(object):
             payload.extend(["|#"])
             payload.append(dimensions)
 
-        encoded = "".join(map(str, payload))
+        encoded = "".join(six.moves.map(str, payload))
         self._send(encoded)
 
     def _send_to_server(self, packet):
