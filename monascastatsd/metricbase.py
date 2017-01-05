@@ -38,6 +38,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from monascastatsd import common
+
 
 class MetricBase(object):
     """Base class for all metric types.
@@ -54,24 +56,11 @@ class MetricBase(object):
 
         dimensions that were passed in on instantiation.
         """
-        if self._dimensions:
-            new_dimensions = self._dimensions.copy()
-        else:
-            new_dimensions = {}
-        if dimensions:
-            new_dimensions.update(dimensions)
-
-        return new_dimensions
+        return common.update_dimensions(self._dimensions, dimensions)
 
     def update_name(self, name):
         """Update the metric name with the metric
 
         base name that was passed in on instantiation.
         """
-        if self._name:
-            metric = self._name
-            if name:
-                metric = metric + "." + name
-        else:
-            metric = name
-        return metric
+        return common.update_name(self._name, name)

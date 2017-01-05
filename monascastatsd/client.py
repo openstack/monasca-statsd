@@ -40,6 +40,7 @@
 
 """Monasca-Statsd is a Python client for Statsd that adds dimensions.
 """
+from monascastatsd import common
 from monascastatsd.connection import Connection
 from monascastatsd.counter import Counter
 from monascastatsd.gauge import Gauge
@@ -106,24 +107,11 @@ class Client(object):
 
         name that was passed in on instantiation.
         """
-        if self._name:
-            metric = self._name
-            if name:
-                metric = metric + "." + name
-        else:
-            metric = name
-        return metric
+        return common.update_name(self._name, name)
 
     def _update_dimensions(self, dimensions):
         """Update the dimensions list with the default
 
         dimensions that were passed in on instantiation.
         """
-        if self._dimensions:
-            new_dimensions = self._dimensions.copy()
-        else:
-            new_dimensions = {}
-        if dimensions:
-            new_dimensions.update(dimensions)
-
-        return new_dimensions
+        return common.update_dimensions(self._dimensions, dimensions)
