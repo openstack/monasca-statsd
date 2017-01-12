@@ -63,11 +63,9 @@ class Connection(object):
         :param max_buffer_size: Maximum number of metric to buffer before
          sending to the server if sending metrics in batch
         """
-        self._host = None
-        self._port = None
-        self.socket = None
         self.max_buffer_size = max_buffer_size
         self._send = self._send_to_server
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.connect(host, port)
         self.encoding = 'utf-8'
 
@@ -97,27 +95,48 @@ class Connection(object):
         """Connect to the monascastatsd server on the given host and port.
 
         """
-        self._host = host
-        self._port = int(port)
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.connect((self._host, self._port))
+        self.socket.connect((host, int(port)))
 
     def report(self, metric, metric_type, value, dimensions, sample_rate):
         """Use this connection to report metrics.
 
         """
-        if sample_rate != 1 and random.random() > sample_rate:
-            return
+        if sample_rate == 1 or random.random() <= sample_rate:
+            self._send_payload(dimensions, metric,
+                               metric_type, sample_rate,
+                               value)
+
+    def _send_payload(self, dimensions, metric, metric_type,
+                      sample_rate, value):
+
+        encoded = self._create_payload(dimensions, metric,
+                                       metric_type, sample_rate,
+                                       value)
+
+        self._send(encoded)
+
+    def _create_payload(self, dimensions, metric, metric_type, sample_rate,
+                        value):
 
         payload = [metric, ":", value, "|", metric_type]
-        if sample_rate != 1:
-            payload.extend(["|@", sample_rate])
-        if dimensions:
-            payload.extend(["|#"])
-            payload.append(dimensions)
+        payload.extend(self._payload_extension_from_sample_rate(sample_rate))
+        payload.extend(self._payload_extension_from_dimensions(dimensions))
 
-        encoded = "".join(six.moves.map(str, payload))
-        self._send(encoded)
+        return "".join(six.moves.map(str, payload))
+
+    @staticmethod
+    def _payload_extension_from_sample_rate(sample_rate):
+        if sample_rate != 1:
+            return ["|@", sample_rate]
+        else:
+            return []
+
+    @staticmethod
+    def _payload_extension_from_dimensions(dimensions):
+        if dimensions:
+            return ["|#", dimensions]
+        else:
+            return []
 
     def _send_to_server(self, packet):
         try:
