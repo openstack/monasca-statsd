@@ -8,3 +8,7 @@ dist
 .tox
 AUTHORS
 ChangeLog
+.coverage
+cover/
+.testrepository/
+doc/build/

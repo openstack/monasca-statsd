@@ -1,4 +1,5 @@
 # (C) Copyright 2014-2016 Hewlett Packard Enterprise Development LP
+# Copyright 2017 FUJITSU LIMITED
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,6 +55,9 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # sys.path.insert(0, os.path.abspath('.'))
 
+import subprocess
+import warnings
+
 # -- General configuration ----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -61,7 +65,14 @@
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.graphviz',
+    'oslosphinx'
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -77,7 +88,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'monasca-statsd'
-copyright = u'2014, HP'
+author = u'OpenStack'
+copyright = u'2014-present, OpenStack Foundatio'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -110,24 +122,24 @@ exclude_patterns = []
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
-# add_module_names = True
+add_module_names = False
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
-# show_authors = False
+show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-# modindex_common_prefix = []
+modindex_common_prefix = ['monasca.']
 
 
 # -- Options for HTML output --------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+# html_theme = 'default'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -160,7 +172,15 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-# html_last_updated_fmt = '%b %d, %Y'
+#html_last_updated_fmt = '%b %d, %Y'
+git_cmd = ["git", "log", "--pretty=format:'%ad, commit %h'", "--date=local",
+    "-n1"]
+try:
+    html_last_updated_fmt = subprocess.Popen(
+        git_cmd, stdout=subprocess.PIPE).communicate()[0].decode()
+except Exception:
+    warnings.warn('Cannot get last updated time from git repository. '
+                  'Not setting "html_last_updated_fmt".')
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -223,7 +243,7 @@ latex_documents = [
     ('index',
      'monasca-statsd-python.tex',
      u'monasca-statsd-python Documentation',
-     u'HP',
+     u'OpenStack Foundation',
      'manual'),
 ]
 
@@ -254,7 +274,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'monasca-statsd-python', u'monasca-statsd-python Documentation',
-     [u'HP'], 1)
+     [u'OpenStack Foundation'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -269,7 +289,7 @@ man_pages = [
 texinfo_documents = [
     ('index', 'monasca-statsd-python',
      u'monasca-statsd-python Documentation',
-     u'HP',
+     u'Openstack Foundation',
      'monasca-statsd-python',
      'One line description of project.',
      'Miscellaneous'),
