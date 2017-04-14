@@ -65,9 +65,23 @@ class Connection(object):
         """
         self.max_buffer_size = max_buffer_size
         self._send = self._send_to_server
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.connect(host, port)
         self.encoding = 'utf-8'
+
+        # Now connect to the server.
+        for addrinfo in socket.getaddrinfo(host,
+                                           port,
+                                           socket.AF_UNSPEC,
+                                           socket.SOCK_DGRAM):
+            af, socktype, proto, unused_name, sa = addrinfo
+            try:
+                self.socket = socket.socket(af, socktype, proto)
+                self.socket.connect(sa)
+                return
+
+            except socket.error as ex:
+                log.debug("Got socket error connecting to: %s: %s", str(sa), str(ex))
+                continue
+        raise Exception("Couldn't connect to any resolution for {}:{}".format(host, port))
 
     def __enter__(self):
         self.open_buffer(self.max_buffer_size)
