@@ -1,7 +1,7 @@
 Team and repository tags
 ========================
 
-[![Team and repository tags](https://governance.openstack.org/badges/monasca-statsd.svg)](https://governance.openstack.org/reference/tags/index.html)
+[![Team and repository tags](https://governance.openstack.org/tc/badges/monasca-statsd.svg)](https://governance.openstack.org/tc/reference/tags/index.html)
 
 <!-- Change things from this point on -->
 
@@ -31,8 +31,8 @@ conn = mstatsd.Connection(host='localhost', port=8125)
 # Create the client with optional dimensions
 client = mstatsd.Client(connection=conn, dimensions={'env': 'test'})
 
-NOTE: You can also create a client without specifying the connection and it will create the client 
-with the default connection information for the monasca-agent statsd processor daemon 
+NOTE: You can also create a client without specifying the connection and it will create the client
+with the default connection information for the monasca-agent statsd processor daemon
 which uses host='localhost' and port=8125.
 
 client = mstatsd.Client(dimensions={'env': 'test'})
