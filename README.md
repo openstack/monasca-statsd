@@ -5,13 +5,13 @@ Team and repository tags
 
 <!-- Change things from this point on -->
 
-A Monasca-Statsd Python client.
+A Monasca-Statsd Python Client.
 ================
 
 Quick Start Guide
 -----------------
 
-First install the library with `pip` or `easy_install`
+First install the library with `pip` or `easy_install`:
 
     # Install in system python ...
     sudo pip install monasca-statsd
@@ -75,21 +75,16 @@ with timer.time('t'):
 histogram = client.get_histogram('my_hist')
 histogram.send('query.time', 10, dimensions = {'version': '1.0', 'environment': 'dev'})
 ```
-Repository
--------------
-
-The monasca-statsd code is located here:
-[here](https://github.com/stackforge/monasca-statsd).
 
 Feedback
 --------
 
-To suggest a feature, report a bug, or general discussion, head over
-[here](https://bugs.launchpad.net/monasca).
+To suggest a feature, report a bug, or participate in the general discussion,
+head over to [StoryBoard](https://storyboard.openstack.org/#!/project/872).
 
 
 License
 -------
 
-See LICENSE file
+See LICENSE file.
 Code was originally forked from Datadog's dogstatsd-python, hence the dual license.
