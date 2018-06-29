@@ -12,3 +12,4 @@ ChangeLog
 cover/
 .testrepository/
 doc/build/
+.stestr
