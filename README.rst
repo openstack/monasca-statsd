@@ -89,5 +89,4 @@ License
 See LICENSE file. Code was originally forked from Datadog’s
 dogstatsd-python, hence the dual license.
 
-.. _Team and repository tags: https://governance.openstack.org/tc/reference/tags/index.html
 .. _StoryBoard: https://storyboard.openstack.org/#!/project/872
