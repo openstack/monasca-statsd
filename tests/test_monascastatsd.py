@@ -274,7 +274,8 @@ class TestMonascaStatsd(unittest.TestCase):
         timer.timing('timer', 123)
         self.client.connection.close_buffer()
 
-        self.assertEqual(six.b("site.views:123|g|#{'env': 'test'}\nsite.timer:123|g|#{'env': 'test'}"),
+        self.assertEqual(six.b("site.views:123|g|#{'env': 'test'}\n"
+                               "site.timer:123|g|#{'env': 'test'}"),
                          self.recv(gauge))
 
     def test_context_manager(self):
@@ -306,6 +307,7 @@ class TestMonascaStatsd(unittest.TestCase):
         assert 0 <= abs(a - b) <= delta, "%s - %s not within %s" % (a,
                                                                     b,
                                                                     delta)
+
 
 if __name__ == '__main__':
     unittest.main()
