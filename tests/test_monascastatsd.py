@@ -48,7 +48,7 @@ import unittest
 
 import monascastatsd as mstatsd
 
-import mock
+from unittest import mock
 import six
 from six.moves import range
 
