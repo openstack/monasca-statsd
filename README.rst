@@ -1,4 +1,4 @@
-Team and repository tags
+Openstack Monasca Statsd
 ========================
 
 .. image:: https://governance.openstack.org/tc/badges/monasca-statsd.svg
